@@ -35,7 +35,6 @@ def toy_example(n_samples, x):
     relative_order = x[-4:]
     if np.sum(relative_order) > n_customers:
         print("error")
-        dffas
 
     val = conditional_simulation(inv_levels, n_samples, n_customers, n_products, cost, sell_price,
                                  relative_order=relative_order, seed=1)
