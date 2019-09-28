@@ -92,7 +92,7 @@ class Matern52(AbstractKernel):
         :return: ([(name_param, name_params)]) name_params can be other list if name_param
             represents several parameters (like an array), otherwise name_params=None.
         """
-        return [(self.length_scale.name, [(i, None) for i in xrange(self.dimension)])]
+        return [(self.length_scale.name, [(i, None) for i in range(self.dimension)])]
 
     def set_parameters(self, length_scale=None):
         """
@@ -312,10 +312,10 @@ class Matern52(AbstractKernel):
         diffs_training_data_x = []
         n = data['points'].shape[0]
 
-        for i in xrange(dimension):
+        for i in range(dimension):
             if n > 1:
                 points = [abs(data['points'][j, i] - data['points'][h, i])
-                          for j in xrange(n) for h in xrange(n)]
+                          for j in range(n) for h in range(n)]
             else:
                 points = [0.324]
 
@@ -490,7 +490,7 @@ class GradientLSMatern52(object):
 
 
         # hessian = {}
-        # for i in xrange(inputs.shape[0]):
+        # for i in range(inputs.shape[0]):
         #     hess = hessian_respect_point['second'][i]
         #     part_1 = hess * derivatives_resp_r['first'][0, i]
         #

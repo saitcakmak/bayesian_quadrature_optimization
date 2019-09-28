@@ -15,7 +15,6 @@ import sys
 
 import itertools
 
-import numpy as np
 from scipy.linalg import lapack
 from scipy import linalg
 
@@ -68,12 +67,10 @@ from stratified_bayesian_optimization.acquisition_functions.ei import EI
 from stratified_bayesian_optimization.acquisition_functions.multi_task import MultiTasks
 from stratified_bayesian_optimization.numerical_tools.bayesian_quadrature import BayesianQuadrature
 
-
 logger = SBOLog(__name__)
 
 
 class SBO(object):
-
     _filename = 'opt_sbo_{model_type}_{problem_name}_{type_kernel}_{training_name}_' \
                 '{n_training}_{random_seed}_mc_{monte_carlo}_samples_params_' \
                 '{n_samples_parameters}_sbo.json'.format
@@ -83,9 +80,8 @@ class SBO(object):
                                 '{monte_carlo}.json'.format
 
     _filename_points_voi_evaluations = 'points_for_voi_{model_type}_{problem_name}_' \
-                                '{type_kernel}_{training_name}_{n_training}_{random_seed}.' \
-                                'json'.format
-
+                                       '{type_kernel}_{training_name}_{n_training}_{random_seed}.' \
+                                       'json'.format
 
     def __init__(self, bayesian_quadrature, discretization_domain=None):
         """
@@ -115,7 +111,7 @@ class SBO(object):
         self.optimization_results = []
 
         # Cached data for MC SBO
-        self.samples = None # Samples from a standard Gaussian r.v. used to estimate SBO
+        self.samples = None  # Samples from a standard Gaussian r.v. used to estimate SBO
         self.starting_points_sbo = None
 
         # 'optimum': arg_max{a_n(x) + sigma(x, candidate_point)*sample}
@@ -125,7 +121,6 @@ class SBO(object):
         # Cached evaluations of the SBO by taking samples of the parameters of the model.
         self.mc_bayesian = {}
         self.args_handler = ()
-
 
     def add_file_to_log(self, model_type, problem_name, training_name, n_training, random_seed,
                         n_samples_parameters):
@@ -165,7 +160,7 @@ class SBO(object):
         return value[0, 0]
 
     def evaluate_gradient_sample(self, point, candidate_point, sample, var_noise=None, mean=None,
-                        parameters_kernel=None, cache=True):
+                                 parameters_kernel=None, cache=True):
         """
         Evaluate the gradient of a sample of a_{n+1}(point) given that candidate_point is chosen.
 
@@ -194,7 +189,7 @@ class SBO(object):
         return grad
 
     def evaluate_hessian_sample(self, point, candidate_point, sample, var_noise=None, mean=None,
-                        parameters_kernel=None, cache=True):
+                                parameters_kernel=None, cache=True):
         """
         Evaluate the hessian of a sample of a_{n+1}(point) given that candidate_point is chosen.
 
@@ -275,12 +270,12 @@ class SBO(object):
 
         if start is None:
             start_points = DomainService.get_points_domain(n_restarts + 1, bounds_x,
-                                                        type_bounds=len(bounds_x) * [0])
+                                                           type_bounds=len(bounds_x) * [0])
             if index_cache in self.bq.optimal_solutions and \
-                            len(self.bq.optimal_solutions[index_cache]) > 0:
+                    len(self.bq.optimal_solutions[index_cache]) > 0:
                 start = self.bq.optimal_solutions[index_cache][-1]['solution']
 
-                start = [start] + start_points[0 : -1]
+                start = [start] + start_points[0: -1]
                 start = np.array(start)
             else:
                 start = np.array(start_points)
@@ -377,7 +372,7 @@ class SBO(object):
 
     def generate_starting_points_evaluate_mc(self, n_restarts, cache=True):
         bounds_x = [self.bounds_opt[i] for i in xrange(len(self.bounds_opt)) if i in
-                 self.bq.x_domain]
+                    self.bq.x_domain]
 
         start_points = DomainService.get_points_domain(n_restarts + 1, bounds_x,
                                                        type_bounds=len(bounds_x) * [0])
@@ -397,7 +392,6 @@ class SBO(object):
             self.starting_points_sbo = start
         return start
 
-
     def evaluate_mc_bayesian(self, candidate_point, n_samples_parameters, n_samples,
                              n_restarts=10, n_best_restarts=0, n_threads=0, compute_max_mean=False,
                              method_opt=None, **opt_params_mc):
@@ -416,7 +410,6 @@ class SBO(object):
         """
         parameters = self.bq.gp.samples_parameters[-n_samples_parameters:]
 
-
         if self.samples is not None:
             samples = self.samples
             start = self.starting_points_sbo
@@ -427,8 +420,8 @@ class SBO(object):
             start = self.starting_points_sbo
             n_restarts = start.shape[0]
 
-        if tuple(candidate_point[0,:]) in self.mc_bayesian:
-            value = self.mc_bayesian[tuple(candidate_point[0,:])]
+        if tuple(candidate_point[0, :]) in self.mc_bayesian:
+            value = self.mc_bayesian[tuple(candidate_point[0, :])]
             return value
 
         arguments = {}
@@ -448,7 +441,7 @@ class SBO(object):
                 for j in xrange(n_restarts):
                     point_dict[(j, i, k)] = [deepcopy(start[j:j + 1, :]), samples[i], parameters[k]]
                     point_start[(j, i, k)] = [deepcopy(start[j:j + 1, :]), candidate_point,
-                                           samples[i], parameters[k]]
+                                              samples[i], parameters[k]]
         n_restarts_ = n_restarts
         if n_best_restarts > 0 and n_best_restarts < n_restarts:
             point_dict = {}
@@ -509,14 +502,14 @@ class SBO(object):
             else:
                 if index_cache not in self.bq.max_mean:
                     self.bq.optimize_posterior_mean(n_treads=0, var_noise=params[0],
-                        parameters_kernel=params[2:], mean=params[1], n_best_restarts=100)
+                                                    parameters_kernel=params[2:], mean=params[1], n_best_restarts=100)
                 max_mean = self.bq.max_mean[index_cache]
 
             values_parameters.append(np.mean(max_values) - max_mean)
         sbo_value = np.mean(values_parameters)
 
         self.mc_bayesian = {}
-        self.mc_bayesian[tuple(candidate_point[0,:])] = sbo_value
+        self.mc_bayesian[tuple(candidate_point[0, :])] = sbo_value
 
         return sbo_value
 
@@ -562,7 +555,7 @@ class SBO(object):
         for j in xrange(n_candidate_points):
             for i in xrange(n_samples_parameters):
                 arguments[(j, i)] = [parameters[i][2:], parameters[i][0], parameters[i][1],
-                                     candidate_points[j:j+1,:]]
+                                     candidate_points[j:j + 1, :]]
 
         args = (False, None, True, n_threads, self)
         Parallel.run_function_different_arguments_parallel(
@@ -574,8 +567,7 @@ class SBO(object):
             for k in xrange(n_samples_parameters):
                 for i in xrange(n_samples):
                     point_start[(i, k, l)] = \
-                        [candidate_points[l:l+1,:], samples[i], parameters[k]]
-
+                        [candidate_points[l:l + 1, :], samples[i], parameters[k]]
 
         point_dict = point_start
 
@@ -623,7 +615,7 @@ class SBO(object):
             gradients = []
             values_parameters = []
             gradient_nan = False
-            candidate_point = candidate_points[l:l+1, :]
+            candidate_point = candidate_points[l:l + 1, :]
             for k in xrange(n_samples_parameters):
                 optimum_values = np.zeros((n_samples, len(self.bq.x_domain)))
                 max_values = []
@@ -658,7 +650,6 @@ class SBO(object):
                     if gradient_b is np.nan:
                         gradient_nan = True
                         gradients = np.nan
-
 
             if compute_gradient:
                 if gradient_nan:
@@ -710,7 +701,7 @@ class SBO(object):
         for j in xrange(n_candidate_points):
             for i in xrange(n_samples_parameters):
                 arguments[(j, i)] = [parameters[i][2:], parameters[i][0], parameters[i][1],
-                                     candidate_points[j:j+1,:]]
+                                     candidate_points[j:j + 1, :]]
 
         args = (False, None, True, n_threads, self)
         Parallel.run_function_different_arguments_parallel(
@@ -723,7 +714,7 @@ class SBO(object):
                 for i in xrange(n_samples):
                     for j in xrange(n_restarts):
                         point_start[(j, i, k, l)] = \
-                            [deepcopy(start[j:j + 1, :]), candidate_points[l:l+1,:], samples[i],
+                            [deepcopy(start[j:j + 1, :]), candidate_points[l:l + 1, :], samples[i],
                              parameters[k]]
 
         n_restarts_ = n_restarts
@@ -744,7 +735,7 @@ class SBO(object):
                         for j in xrange(len(values_index)):
                             index_p = values_index[j]
                             point_dict[(j, i, k, l)] = \
-                                [start[index_p : index_p + 1, :], candidate_points[l:l+1,:],
+                                [start[index_p: index_p + 1, :], candidate_points[l:l + 1, :],
                                  samples[i], parameters[k]]
             n_restarts_ = len(values_index)
         else:
@@ -768,7 +759,7 @@ class SBO(object):
         for l in xrange(n_candidate_points):
             gradients = []
             values_parameters = []
-            candidate_point = candidate_points[l:l+1, :]
+            candidate_point = candidate_points[l:l + 1, :]
             for k in xrange(n_samples_parameters):
                 optimum_values = np.zeros((n_samples, len(self.bq.x_domain)))
                 max_values = []
@@ -796,7 +787,8 @@ class SBO(object):
                 else:
                     if index_cache not in self.bq.max_mean:
                         self.bq.optimize_posterior_mean(n_treads=0, var_noise=params[0],
-                            parameters_kernel=params[2:], mean=params[1], n_best_restarts=100)
+                                                        parameters_kernel=params[2:], mean=params[1],
+                                                        n_best_restarts=100)
                     max_mean = self.bq.max_mean[index_cache]
 
                 values_parameters.append(np.mean(max_values) - max_mean)
@@ -856,7 +848,7 @@ class SBO(object):
         for j in xrange(n_candidate_points):
             for i in xrange(n_samples_parameters):
                 arguments[(j, i)] = [parameters[i][2:], parameters[i][0], parameters[i][1],
-                                     candidate_points[j:j+1,:]]
+                                     candidate_points[j:j + 1, :]]
 
         args = (False, None, True, n_threads, self)
         Parallel.run_function_different_arguments_parallel(
@@ -869,7 +861,7 @@ class SBO(object):
                 for i in xrange(n_samples):
                     for j in xrange(n_restarts):
                         point_start[(j, i, k, l)] = \
-                            [deepcopy(start[j:j + 1, :]), candidate_points[l:l+1,:], samples[i],
+                            [deepcopy(start[j:j + 1, :]), candidate_points[l:l + 1, :], samples[i],
                              parameters[k]]
 
         n_restarts_ = n_restarts
@@ -890,7 +882,7 @@ class SBO(object):
                         for j in xrange(len(values_index)):
                             index_p = values_index[j]
                             point_dict[(j, i, k, l)] = \
-                                [start[index_p : index_p + 1, :], candidate_points[l:l+1,:],
+                                [start[index_p: index_p + 1, :], candidate_points[l:l + 1, :],
                                  samples[i], parameters[k]]
             n_restarts_ = len(values_index)
         else:
@@ -914,7 +906,7 @@ class SBO(object):
         for l in xrange(n_candidate_points):
             gradients = []
             values_parameters = []
-            candidate_point = candidate_points[l:l+1, :]
+            candidate_point = candidate_points[l:l + 1, :]
             for k in xrange(n_samples_parameters):
                 optimum_values = np.zeros((n_samples, len(self.bq.x_domain)))
                 max_values = []
@@ -942,7 +934,8 @@ class SBO(object):
                 else:
                     if index_cache not in self.bq.max_mean:
                         self.bq.optimize_posterior_mean(n_treads=0, var_noise=params[0],
-                            parameters_kernel=params[2:], mean=params[1], n_best_restarts=100)
+                                                        parameters_kernel=params[2:], mean=params[1],
+                                                        n_best_restarts=100)
                     max_mean = self.bq.max_mean[index_cache]
 
                 values_parameters.append(np.mean(max_values) - max_mean)
@@ -1017,7 +1010,7 @@ class SBO(object):
             n_restarts = len(values_index)
 
         args = (False, None, parallel, n_threads, self, sample, candidate_point, var_noise, mean,
-                 parameters_kernel, 0, method_opt)
+                parameters_kernel, 0, method_opt)
 
         values_opt = Parallel.run_function_different_arguments_parallel(
             wrapper_evaluate_sbo_by_sample_2, point_start, *args, **opt_params_mc)
@@ -1067,10 +1060,9 @@ class SBO(object):
         :return: {'gradient': np.array(n), 'std': np.array(n)}
         """
 
-
-        if tuple(candidate_point[0,:]) not in self.mc_bayesian:
+        if tuple(candidate_point[0, :]) not in self.mc_bayesian:
             self.evaluate_mc_bayesian(candidate_point, n_samples_parameters, n_samples,
-                                 n_restarts=n_restarts, n_best_restarts=n_best_restarts,
+                                      n_restarts=n_restarts, n_best_restarts=n_best_restarts,
                                       n_threads=n_threads, compute_max_mean=compute_max_mean,
                                       method_opt=method_opt, **opt_params_mc)
 
@@ -1130,7 +1122,7 @@ class SBO(object):
         if monte_carlo:
             sample = np.random.normal(0, 1, 1)[0]
 
-        #TODO IMPLEMENT THE CASE WHEN MONTE_CARLO IS FALSE
+        # TODO IMPLEMENT THE CASE WHEN MONTE_CARLO IS FALSE
 
         grad = self.evaluate_gradient_given_sample_given_parameters(
             point, sample, params, n_restarts, n_best_restarts, n_threads, parallel,
@@ -1160,8 +1152,8 @@ class SBO(object):
         if monte_carlo is False:
             args = (monte_carlo, n_samples, n_restarts, n_best_restarts, n_threads)
             value = BayesianEvaluations.evaluate(self.objective_voi, point, self.bq.gp,
-                                               n_samples_parameters, None, *args,
-                                               **opt_params_mc)[0]
+                                                 n_samples_parameters, None, *args,
+                                                 **opt_params_mc)[0]
         else:
             point = point.reshape((1, len(point)))
             value = self.evaluate_mc_bayesian(
@@ -1171,7 +1163,7 @@ class SBO(object):
         return value
 
     def grad_obj_voi_bayesian(self, point, monte_carlo, n_samples_parameters, n_samples,
-                               n_restarts, n_best_restarts, n_threads, **opt_params_mc):
+                              n_restarts, n_best_restarts, n_threads, **opt_params_mc):
         """
         Computes gradient of voi using a Bayesian approach.
         :param point:
@@ -1187,8 +1179,8 @@ class SBO(object):
         if monte_carlo is False:
             args = (monte_carlo, n_samples, n_restarts, n_best_restarts, n_threads)
             value = BayesianEvaluations.evaluate(self.grad_obj_voi, point, self.bq.gp,
-                                               n_samples_parameters, None, *args,
-                                               **opt_params_mc)[0]
+                                                 n_samples_parameters, None, *args,
+                                                 **opt_params_mc)[0]
         else:
             point = point.reshape((1, len(point)))
             value = self.evaluate_gradient_mc_bayesian(
@@ -1197,7 +1189,7 @@ class SBO(object):
 
         return value
 
-    def evaluate_mc(self, candidate_point,  n_samples, var_noise=None, mean=None,
+    def evaluate_mc(self, candidate_point, n_samples, var_noise=None, mean=None,
                     parameters_kernel=None, random_seed=None, parallel=True, n_restarts=10,
                     n_best_restarts=0, n_threads=0, method_opt=None, **opt_params_mc):
         """
@@ -1276,8 +1268,8 @@ class SBO(object):
             for i in xrange(n_samples):
 
                 for j in xrange(n_restarts):
-                    point_dict[(j, i)] = [deepcopy(start[j:j+1,:]), samples[i]]
-                    point_start[(j, i)] = [deepcopy(start[j:j+1,:]), candidate_point, samples[i]]
+                    point_dict[(j, i)] = [deepcopy(start[j:j + 1, :]), samples[i]]
+                    point_start[(j, i)] = [deepcopy(start[j:j + 1, :]), candidate_point, samples[i]]
             n_restarts_ = n_restarts
 
             if n_best_restarts > 0 and n_best_restarts < n_restarts:
@@ -1390,7 +1382,6 @@ class SBO(object):
 
         return {'gradient': gradient_approx, 'std': np.std(gradient, axis=0) / n_samples}
 
-
     def evaluate(self, point, var_noise=None, mean=None, parameters_kernel=None, cache=True,
                  n_threads=0):
         """
@@ -1424,7 +1415,6 @@ class SBO(object):
 
         return self.hvoi(b, c, keep1)
 
-
     def evaluate_gradient(self, point, var_noise=None, mean=None, parameters_kernel=None,
                           cache=True, n_threads=0):
         """
@@ -1453,14 +1443,14 @@ class SBO(object):
         keep1 = keep1.astype(np.int64)
         M = len(keep1)
 
-        if M <=1 :
+        if M <= 1:
             return np.zeros(point.shape[1])
 
-        keep=keep[keep1] #indices conserved
+        keep = keep[keep1]  # indices conserved
 
-        c=c[keep1+1]
-        c2=np.abs(c[0:M-1])
-        evalC=norm.pdf(c2)
+        c = c[keep1 + 1]
+        c2 = np.abs(c[0:M - 1])
+        evalC = norm.pdf(c2)
 
         gradients = self.bq.gradient_vector_b(point, self.discretization[keep, :],
                                               var_noise=var_noise, mean=mean,
@@ -1660,7 +1650,7 @@ class SBO(object):
 
         bounds = self.bq.bounds
 
-        #TODO: CHANGE ei.optimize with n_samples_parameters
+        # TODO: CHANGE ei.optimize with n_samples_parameters
         points_st_ei = []
         values_ei = []
         if start_ei and not self.bq.separate_tasks:
@@ -1673,8 +1663,8 @@ class SBO(object):
             n_best_restarts -= 1
         elif start_ei:
             quadrature_2 = BayesianQuadrature(self.bq.gp, self.bq.x_domain, self.bq.distribution,
-                                            parameters_distribution=self.bq.parameters_distribution,
-                                            model_only_x=True)
+                                              parameters_distribution=self.bq.parameters_distribution,
+                                              model_only_x=True)
             mk = MultiTasks(quadrature_2, quadrature_2.parameters_distribution.get(TASKS))
             st_ei = mk.optimize(parallel=True, n_restarts=100,
                                 n_best_restarts=10,
@@ -1689,8 +1679,8 @@ class SBO(object):
                 tasks = self.bq.tasks
                 n_tasks = len(tasks)
 
-             #   n_restarts = int(np.ceil(float(n_restarts) / n_tasks) * n_tasks)
-               # n_restarts = max(1, n_restarts / n_tasks)
+                #   n_restarts = int(np.ceil(float(n_restarts) / n_tasks) * n_tasks)
+                # n_restarts = max(1, n_restarts / n_tasks)
 
                 # ind = [[i] for i in range(n_restarts)]
                 # np.random.shuffle(ind)
@@ -1801,7 +1791,7 @@ class SBO(object):
         opt_method = None
         compute_value_function = False
         if n_samples_parameters == 0 and not monte_carlo:
-            #TODO: CHECK THIS
+            # TODO: CHECK THIS
             optimization = Optimization(
                 LBFGS_NAME,
                 wrapper_objective_voi,
@@ -1809,7 +1799,7 @@ class SBO(object):
                 wrapper_gradient_voi,
                 minimize=False, **{'maxiter': 10})
 
-            if n_restarts > int( mp.cpu_count() / 2):
+            if n_restarts > int(mp.cpu_count() / 2):
                 args = (False, None, parallel, 0, optimization, self, monte_carlo, n_samples,
                         n_restarts_mc, n_best_restarts_mc, opt_params_mc, n_threads,
                         n_samples_parameters, method_opt_mc)
@@ -1827,8 +1817,8 @@ class SBO(object):
 
             args_ = (self, monte_carlo, default_n_samples, default_restarts_mc, n_best_restarts_mc,
                      opt_params_mc, n_threads, n_parameters, method_opt_mc)
-            #TODO CHANGE wrapper_objective_voi, wrapper_grad_voi_sgd TO NO SOLVE MAX_a_{n+1} in
-            #TODO: parallel for the several starting points
+            # TODO CHANGE wrapper_objective_voi, wrapper_grad_voi_sgd TO NO SOLVE MAX_a_{n+1} in
+            # TODO: parallel for the several starting points
 
             optimization = Optimization(
                 SGD_NAME,
@@ -1840,7 +1830,7 @@ class SBO(object):
                 args=args_, debug=False,
                 **{'maxepoch': maxepoch}
             )
-            #TODO: THINK ABOUT N_THREADS. Do we want to run it in parallel?
+            # TODO: THINK ABOUT N_THREADS. Do we want to run it in parallel?
             N = max(n_samples * n_samples_parameters, n_samples_parameters, n_samples)
             bayesian = True
             if n_samples_parameters == 0:
@@ -1949,13 +1939,13 @@ class SBO(object):
         return optimal_solutions.get(ind_max)
 
     @staticmethod
-    def hvoi (b,c,keep):
-        M=len(keep)
-        if M>1:
-            c=c[keep+1]
-            c2=-np.abs(c[0:M-1])
-            tmp=norm.pdf(c2)+c2*norm.cdf(c2)
-            return np.sum(np.diff(b[keep])*tmp)
+    def hvoi(b, c, keep):
+        M = len(keep)
+        if M > 1:
+            c = c[keep + 1]
+            c2 = -np.abs(c[0:M - 1])
+            tmp = norm.pdf(c2) + c2 * norm.cdf(c2)
+            return np.sum(np.diff(b[keep]) * tmp)
         else:
             return 0
 
@@ -2041,19 +2031,17 @@ class SBO(object):
             kernel_name += kernel + '_'
         kernel_name = kernel_name[0: -1]
 
-
         f_name = self._filename_points_voi_evaluations(
-                                                model_type=model_type,
-                                                problem_name=problem_name,
-                                                type_kernel=kernel_name,
-                                                training_name=training_name,
-                                                n_training=n_training,
-                                                random_seed=random_seed)
+            model_type=model_type,
+            problem_name=problem_name,
+            type_kernel=kernel_name,
+            training_name=training_name,
+            n_training=n_training,
+            random_seed=random_seed)
 
         debug_path = path.join(debug_dir, f_name)
 
         vectors = JSONFile.read(debug_path)
-
 
         if vectors is None:
             bounds = self.bq.gp.bounds
@@ -2074,7 +2062,6 @@ class SBO(object):
 
             JSONFile.write(vectors, debug_path)
 
-
         # TODO: extend to the case where w can be continuous
         n = len(vectors)
         points = deepcopy(vectors)
@@ -2093,7 +2080,6 @@ class SBO(object):
                     values[task] = wrapper_evaluate_sbo_mc(
                         vectors, task, self, n_samples=n_samples, n_restarts=n_restarts_mc)
 
-
         f_name = self._filename_voi_evaluations(iteration=iteration,
                                                 model_type=model_type,
                                                 problem_name=problem_name,
@@ -2105,8 +2091,6 @@ class SBO(object):
 
         debug_path = path.join(debug_dir, f_name)
 
-
         JSONFile.write({'points': points, 'evaluations': values}, debug_path)
 
         return values
-

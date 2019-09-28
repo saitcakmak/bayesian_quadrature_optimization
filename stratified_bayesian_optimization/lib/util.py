@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from stratified_bayesian_optimization.lib.constant import(
+from stratified_bayesian_optimization.lib.constant import (
     MATERN52_NAME,
     TASKS_KERNEL_NAME,
     PRODUCT_KERNELS_SEPARABLE,
@@ -122,6 +122,7 @@ def wrapper_evaluate_objective_function(
             return objective_function(point)
         else:
             return objective_function(point, n_samples)
+
 
 def get_number_parameters_kernel(kernel_name, dim, **kernel_parameters):
     """
@@ -381,6 +382,7 @@ def wrapper_objective_voi(point, self, monte_carlo=False, n_samples=1, n_restart
 
     return value
 
+
 def wrapper_gradient_voi(point, self, monte_carlo=False, n_samples=1, n_restarts=1,
                          n_best_restarts=0, opt_params_mc=None, n_threads=0,
                          n_samples_parameters=0, method_opt_mc=None):
@@ -416,6 +418,7 @@ def wrapper_gradient_voi(point, self, monte_carlo=False, n_samples=1, n_restarts
 
     return value
 
+
 def wrapper_evaluate_quadrature_cross_cov(point, historical_points, parameters_kernel, self):
     """
     Wrapper of evaluate quadrature cross cov
@@ -428,7 +431,7 @@ def wrapper_evaluate_quadrature_cross_cov(point, historical_points, parameters_k
     """
 
     return self.evaluate_quadrature_cross_cov(
-                point, historical_points, parameters_kernel)
+        point, historical_points, parameters_kernel)
 
 
 def wrapper_compute_vector_b(point, compute_vec_covs, compute_b_new, historical_points,
@@ -463,6 +466,7 @@ def wrapper_compute_vector_b(point, compute_vec_covs, compute_b_new, historical_
         'vec_covs': vec_covs,
     }
 
+
 def wrapper_evaluate_sbo_mc(candidate_points, task, self, n_samples, n_restarts):
     """
 
@@ -474,11 +478,10 @@ def wrapper_evaluate_sbo_mc(candidate_points, task, self, n_samples, n_restarts)
 
     :return: np.array(r)
     """
-    tasks =  candidate_points.shape[0] * [task]
+    tasks = candidate_points.shape[0] * [task]
     tasks = np.array(tasks).reshape((len(tasks), 1))
 
     candidate_points = np.concatenate((candidate_points, tasks), axis=1)
-
 
     r = candidate_points.shape[0]
 
@@ -509,7 +512,7 @@ def wrapper_evaluate_sbo(candidate_points, task, self):
     :param self: sbo instance
     :return: np.array(r)
     """
-    tasks =  candidate_points.shape[0] * [task]
+    tasks = candidate_points.shape[0] * [task]
     tasks = np.array(tasks).reshape((len(tasks), 1))
 
     candidate_points = np.concatenate((candidate_points, tasks), axis=1)
@@ -524,7 +527,6 @@ def wrapper_evaluate_sbo(candidate_points, task, self):
     r = candidate_points.shape[0]
 
     values = np.zeros(r)
-
 
     b_vectors = {}
     for i in xrange(r):
@@ -562,6 +564,7 @@ def wrapper_hvoi(b, a, self):
 
     return self.hvoi(b, c, keep1)
 
+
 def wrapper_GPFittingGaussian(training_data_sets, model, type_kernel, dimensions, bounds_domain,
                               thinning, n_burning, max_steps_out, random_seed, problem_name,
                               training_name, **kernel_parameters):
@@ -588,6 +591,7 @@ def wrapper_GPFittingGaussian(training_data_sets, model, type_kernel, dimensions
 
     return gp
 
+
 def wrapper_evaluate_sbo_by_sample(start_sample, self, candidate_point, var_noise, mean,
                                    parameters_kernel, n_threads, method_opt, **opt_params_mc):
     """
@@ -611,8 +615,9 @@ def wrapper_evaluate_sbo_by_sample(start_sample, self, candidate_point, var_nois
         parameters_kernel=parameters_kernel, n_restarts=0, parallel=False, n_threads=n_threads,
         method_opt=method_opt, tol=None, **opt_params_mc)
 
+
 def wrapper_evaluate_sbo_by_sample_2(start, self, sample, candidate_point, var_noise, mean,
-                                   parameters_kernel, n_threads, method_opt, **opt_params_mc):
+                                     parameters_kernel, n_threads, method_opt, **opt_params_mc):
     """
 
     :param start: np.array(n)
@@ -634,10 +639,10 @@ def wrapper_evaluate_sbo_by_sample_2(start, self, sample, candidate_point, var_n
         parameters_kernel=parameters_kernel, n_restarts=0, parallel=False, n_threads=n_threads,
         method_opt=method_opt, tol=None, **opt_params_mc)
 
+
 def wrapper_evaluate_sbo_by_sample_no_sp(
         sample_candid_parameters, self, n_threads, method_opt, n_restarts,
         **opt_params_mc):
-
     sample = sample_candid_parameters[1]
     candidate_point = sample_candid_parameters[0]
     params = sample_candid_parameters[2]
@@ -675,8 +680,9 @@ def wrapper_evaluate_sbo_by_sample_bayesian(start_sample_parameters, self, candi
         parameters_kernel=params[2:], n_restarts=0, parallel=False, n_threads=n_threads,
         method_opt=method_opt, tol=None, **opt_params_mc)
 
+
 def wrapper_evaluate_sbo_by_sample_bayesian_2(start_sample_parameters_candidate, self, n_threads,
-                                            method_opt, **opt_params_mc):
+                                              method_opt, **opt_params_mc):
     """
 
     :param start_sample_parameters: [np.array(n), float, np.array(l)], the first element is the
@@ -702,6 +708,7 @@ def wrapper_evaluate_sbo_by_sample_bayesian_2(start_sample_parameters_candidate,
         parameters_kernel=params[2:], n_restarts=0, parallel=False, n_threads=n_threads,
         method_opt=method_opt, tol=None, **opt_params_mc)
 
+
 def wrapper_evaluate_sample(point, self, *args):
     """
 
@@ -717,6 +724,7 @@ def wrapper_evaluate_sample(point, self, *args):
 
     return val
 
+
 def wrapper_evaluate_sample_bayesian(point, self):
     point_ = point[0]
     candidate_point = point[1]
@@ -726,6 +734,7 @@ def wrapper_evaluate_sample_bayesian(point, self):
     val = self.evaluate_sample(point_, candidate_point, sample, params[0], params[1], params[2:],
                                True, 0, False)
     return val
+
 
 def wrapper_evaluate_gradient_sample(point, self, *args):
     """
@@ -737,8 +746,10 @@ def wrapper_evaluate_gradient_sample(point, self, *args):
     """
     return self.evaluate_gradient_sample(point, *args)
 
+
 def wrapper_log_posterior_distribution_length_scale(point, self):
     return self.log_posterior_distribution_length_scale(point)
+
 
 def wrapper_evaluate_hessian_sample(point, self, *args):
     """
@@ -754,11 +765,14 @@ def wrapper_evaluate_hessian_sample(point, self, *args):
 def wrapper_mean_objective(point, self, parameters):
     return self.mean_objective(point, parameters)
 
+
 def wrapper_ei_objective(point, self, samples, parameters):
     return self.ei_objective(point, samples, parameters)
 
+
 def wrapper_evaluate_squared_error(point, self, control, parameters):
     return self.evaluate_squared_error(point, control, parameters)
+
 
 def wrapper_optimize(point, self, *args):
     """
@@ -771,6 +785,7 @@ def wrapper_optimize(point, self, *args):
 
     return self.optimize(point, *args)
 
+
 def wrapper_sgd(point_rs, self, *args, **kwargs):
     point = point_rs[0]
     rs = point_rs[1]
@@ -778,6 +793,7 @@ def wrapper_sgd(point_rs, self, *args, **kwargs):
     np.random.seed(rs)
 
     return self.SGD(point, *args, **kwargs)
+
 
 def wrapper_objective_posterior_mean_bq(point, self, var_noise=None, mean=None,
                                         parameters_kernel=None, n_samples_parameters=0):
@@ -796,6 +812,7 @@ def wrapper_objective_posterior_mean_bq(point, self, var_noise=None, mean=None,
                                            n_samples_parameters, None)[0]
 
     return val
+
 
 def wrapper_grad_posterior_mean_bq(point, self, var_noise=None, mean=None, parameters_kernel=None,
                                    n_samples_parameters=0):
@@ -816,6 +833,7 @@ def wrapper_grad_posterior_mean_bq(point, self, var_noise=None, mean=None, param
 
     return val
 
+
 def wrapper_hessian_posterior_mean_bq(
         point, self, var_noise=None, mean=None, parameters_kernel=None, n_samples_parameters=0):
     """
@@ -832,6 +850,7 @@ def wrapper_hessian_posterior_mean_bq(
     val = self.hessian_posterior_mean(point, var_noise, mean, parameters_kernel)
 
     return val
+
 
 def wrapper_objective_acquisition_function(point, self, n_samples_parameters=0, *params):
     """
@@ -859,6 +878,7 @@ def wrapper_objective_acquisition_function(point, self, n_samples_parameters=0, 
 
     return value
 
+
 def wrapper_posterior_mean_gp_model(point, self, n_samples_parameters=0, *params):
     point = point.reshape((1, len(point)))
 
@@ -868,9 +888,11 @@ def wrapper_posterior_mean_gp_model(point, self, n_samples_parameters=0, *params
         def evaluate(point, var_noise=None, mean=None, parameters_kernel=None):
             return self.compute_posterior_parameters(
                 point, var_noise, mean, parameters_kernel, only_mean=True)['mean']
+
         value = BayesianEvaluations.evaluate(evaluate, point, self, n_samples_parameters,
                                              None, *params)[0]
     return value
+
 
 def wrapper_gradient_posterior_mean_gp_model(point, self, n_samples_parameters=0, *params):
     point = point.reshape((1, len(point)))
@@ -880,9 +902,11 @@ def wrapper_gradient_posterior_mean_gp_model(point, self, n_samples_parameters=0
         def evaluate(point, var_noise=None, mean=None, parameters_kernel=None):
             return self.gradient_posterior_parameters(
                 point, var_noise, mean, parameters_kernel, only_mean=True)['mean']
+
         value = BayesianEvaluations.evaluate(evaluate, point, self, n_samples_parameters,
                                              None, *params)[0]
     return value
+
 
 def wrapper_gradient_acquisition_function(point, self, n_samples_parameters=0, *params):
     """
@@ -909,17 +933,20 @@ def wrapper_gradient_acquisition_function(point, self, n_samples_parameters=0, *
 
     return value
 
+
 def wrapper_get_parameters_for_samples(parameters, point, self, *args):
     return self.bq.get_parameters_for_samples(True, point, parameters[0], parameters[1],
                                               parameters[2], clear_cache=False)
+
 
 def wrapper_get_parameters_for_samples_2(parameters, self, *args):
     return self.bq.get_parameters_for_samples(True, parameters[3], parameters[0], parameters[1],
                                               parameters[2], clear_cache=False)
 
-def wrapper_grad_voi_sgd(point, self, *args, **opt_params_mc):
 
-    return self.grad_voi_sgd(point, *args,  **opt_params_mc)
+def wrapper_grad_voi_sgd(point, self, *args, **opt_params_mc):
+    return self.grad_voi_sgd(point, *args, **opt_params_mc)
+
 
 def wrapper_optimize_posterior_mean(parameter, self, random_seed, method_opt, n_restarts):
     opt_result = self.optimize_posterior_mean(
@@ -928,12 +955,14 @@ def wrapper_optimize_posterior_mean(parameter, self, random_seed, method_opt, n_
         method_opt=method_opt, parallel=False, n_best_restarts=0)
     return opt_result
 
-def wrapper_evaluate_gradient_ei_sample_params(point, self):
 
+def wrapper_evaluate_gradient_ei_sample_params(point, self):
     return self.evaluate_gradient_sample_params(point)
+
 
 def wrapper_evaluate_gradient_sample_params_bq(point, self):
     return self.evaluate_gradient_sample_params(point)
+
 
 def wrapper_evaluate_gradient_sample_params_gp(point, self):
     return self.evaluate_gradient_sample_params(point)

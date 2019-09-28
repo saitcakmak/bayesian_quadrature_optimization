@@ -42,20 +42,20 @@ def simulation(x, runlength, n_customers, n_products, cost, sell_price, mu=1.0, 
     elif sum_exp is not None:
         gumbel_array = np.zeros([n, runlength, T])
         # See p.243 of Simulation by Sheldon Ross
-        for j in xrange(runlength):
-            for product in xrange(n):
+        for j in range(runlength):
+            for product in range(n):
                 exponential = rejection_sampling_cond_exponential(1, T, sum_exp[product], mu)[0, :]
                 gumbel = np.zeros(T)
-                for i in xrange(T):
+                for i in range(T):
                     gumbel[i] = (1.0 - np.exp(- exponential[i] * mu))
                     gumbel[i] = mu * special.psi(1.0) - mu * np.log(-np.log(gumbel[i]))
                 gumbel_array[product, j, :] = gumbel
         gumbel = gumbel_array
     elif set_sum_exp is not None:
         gumbel_array = np.zeros([n, runlength, T])
-        for j in xrange(runlength):
-            for product in xrange(n):
-                exponential = rejection_sampling_cond_set_exponential(1, T, set_sum_exp[product], mu)[0,:]
+        for j in range(runlength):
+            for product in range(n):
+                exponential = rejection_sampling_cond_set_exponential(1, T, set_sum_exp[product], mu)[0, :]
                 # upper = set_sum_exp[product][1]
                 # lower = set_sum_exp[product][0]
                 # if upper == np.inf:
@@ -63,44 +63,43 @@ def simulation(x, runlength, n_customers, n_products, cost, sell_price, mu=1.0, 
                 # else:
                 #     up = upper
                 # start = np.zeros(T)
-                # for i in xrange(T):
+                # for i in range(T):
                 #     start[i] = np.random.uniform(lower / T, up / T, 1)
                 # exponential = \
                 #     gibbs_sampler(start, T, set_sum_exp[product], mu, 500, 5, 1)[0, :]
                 gumbel = np.zeros(T)
-                for i in xrange(T):
+                for i in range(T):
                     gumbel[i] = (1.0 - np.exp(- exponential[i] * mu))
                     gumbel[i] = mu * special.psi(1.0) - mu * np.log(-np.log(gumbel[i]))
                 gumbel_array[product, j, :] = gumbel
         gumbel = gumbel_array
 
-
     # Determine Utility Function
     utility = np.zeros((n, runlength, T))
-    for i in xrange(n):
+    for i in range(n):
         utility[i, :, :] = u[i] + gumbel[i, :, :]
 
     initial = np.repeat(x, runlength, axis=0)
     inventory = initial.copy()
 
-    for j in xrange(T):
-        for k in xrange(runlength):
-            available = np.where(inventory[k,:]>0)
+    for j in range(T):
+        for k in range(runlength):
+            available = np.where(inventory[k, :] > 0)
             if len(available[0]) == 0:
                 continue
-            decision = utility[available[0],k,j]
+            decision = utility[available[0], k, j]
             maxVal = max(decision)
             if maxVal > 0:
-                index = np.where(utility[:,k,j] == maxVal)[0][0]
+                index = np.where(utility[:, k, j] == maxVal)[0][0]
                 inventory[k, index] -= 1
 
     # Compute daily profit
-    numSold =initial - inventory
-    unitProfit=sell_price-cost
-    singleRepProfit=np.dot(numSold, unitProfit)
+    numSold = initial - inventory
+    unitProfit = sell_price - cost
+    singleRepProfit = np.dot(numSold, unitProfit)
     singleRepProfit -= np.dot(inventory, cost)
     fn = np.mean(singleRepProfit)
-    FnVar = np.var(singleRepProfit)/runlength
+    FnVar = np.var(singleRepProfit) / runlength
 
     return [fn, FnVar]
 
@@ -116,10 +115,10 @@ def gibss_sampler_exponential(starting, n, limit, lamb):
     """
     sample = starting
 
-    for index in xrange(n):
+    for index in range(n):
         u = np.random.uniform(0, 1, 1)
         sum = 0
-        for i in xrange(n):
+        for i in range(n):
             if i != index:
                 sum += sample[i]
         a1 = max(limit[0] - sum, 0)
@@ -130,12 +129,13 @@ def gibss_sampler_exponential(starting, n, limit, lamb):
         sample[index] = x
     return sample
 
+
 def gibbs_sampler(starting, n, limit, lamb, burning, thinning, n_samples):
-    for i in xrange(burning):
+    for i in range(burning):
         starting = gibss_sampler_exponential(starting, n, limit, lamb)
     samples = np.zeros((n_samples, n))
-    for j in xrange(n_samples):
-        for l in xrange(thinning):
+    for j in range(n_samples):
+        for l in range(thinning):
             starting = gibss_sampler_exponential(starting, n, limit, lamb)
         samples[j, :] = starting
     return samples
@@ -151,12 +151,13 @@ def rejection_sampling_cond_exponential(n_samples, T, sum_exp, mu):
         exponential = np.random.exponential(1 / mu, T - 1)
         if exponential.sum() > sum_exp:
             continue
-        ratio = (1/mu)* np.exp(-(sum_exp - exponential.sum())) / cte
+        ratio = (1 / mu) * np.exp(-(sum_exp - exponential.sum())) / cte
         if u < ratio / M:
             exponential = np.concatenate([exponential, [sum_exp - exponential.sum()]])
             samplings.append(exponential)
             n += 1
     return np.array(samplings)
+
 
 def rejection_sampling_cond_set_exponential(n_samples, T, set_exp, mu):
     n = 0
@@ -168,6 +169,3 @@ def rejection_sampling_cond_set_exponential(n_samples, T, set_exp, mu):
         samplings.append(exponential)
         n += 1
     return np.array(samplings)
-
-
-

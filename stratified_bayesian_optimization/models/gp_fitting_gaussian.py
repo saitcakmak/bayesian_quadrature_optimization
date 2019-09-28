@@ -310,7 +310,7 @@ class GPFittingGaussian(object):
         n_samples = int(n_samples)
 
         if len(self.slice_samplers) == 1:
-            for sample in xrange(n_samples):
+            for sample in range(n_samples):
                 start_point_ = None
                 n_try = 0
                 points = separate_vector(start_point, self.length_scale_indexes)
@@ -329,7 +329,7 @@ class GPFittingGaussian(object):
                 samples.append(start_point)
             return samples[::self.thinning + 1]
 
-        for sample in xrange(n_samples):
+        for sample in range(n_samples):
             points = separate_vector(start_point, self.length_scale_indexes)
             for index, slice in enumerate(self.slice_samplers):
                 new_point_ = None
@@ -567,7 +567,7 @@ class GPFittingGaussian(object):
             var_noise = []
 
         n_points = len(evaluations)
-        points = [list(data_as_np['points'][i, :]) for i in xrange(n_points)]
+        points = [list(data_as_np['points'][i, :]) for i in range(n_points)]
 
         data = {}
         data['points'] = points
@@ -856,7 +856,7 @@ class GPFittingGaussian(object):
             solve = cached_solve
 
         gradient_kernel_params = np.zeros(len(parameters_kernel))
-        for i in xrange(len(parameters_kernel)):
+        for i in range(len(parameters_kernel)):
             gradient_kernel_params[i] = GradientGPFittingGaussian.\
                 compute_gradient_llh_given_grad_cov(grad_cov[i], chol, solve)
 
@@ -1434,7 +1434,7 @@ class GPFittingGaussian(object):
 
             if n_restart_ > n_best_restarts and n_best_restarts > 0:
                 point_dict = {}
-                for j in xrange(start.shape[0]):
+                for j in range(start.shape[0]):
                     point_dict[j] = start[j, :]
                 args = (False, None, True, 0, self, DEFAULT_N_PARAMETERS)
                 ei_values = Parallel.run_function_different_arguments_parallel(
@@ -1469,7 +1469,7 @@ class GPFittingGaussian(object):
             opt_method = wrapper_optimize
 
             point_dict = {}
-            for j in xrange(n_restarts):
+            for j in range(n_restarts):
                 point_dict[j] = start[j, :]
         else:
 
@@ -1497,14 +1497,14 @@ class GPFittingGaussian(object):
 
             random_seeds = np.random.randint(0, 4294967295, n_restarts)
             point_dict = {}
-            for j in xrange(n_restarts):
+            for j in range(n_restarts):
                 point_dict[j] = [start[j, :], random_seeds[j]]
 
         optimal_solutions = Parallel.run_function_different_arguments_parallel(
             opt_method, point_dict, *args)
 
         maximum_values = []
-        for j in xrange(n_restarts):
+        for j in range(n_restarts):
             maximum_values.append(optimal_solutions.get(j)['optimal_value'])
 
         ind_max = np.argmax(maximum_values)
@@ -1772,7 +1772,7 @@ class ValidationGPModel(object):
         test_points = {}
         gp_objects = {}
 
-        for i in xrange(n_data):
+        for i in range(n_data):
             selector = [x for x in range(n_data) if x != i]
             training_data_sets[i] = {}
             test_points[i] = {}
@@ -1796,7 +1796,7 @@ class ValidationGPModel(object):
             wrapper_GPFittingGaussian, training_data_sets, *args, **kernel_parameters
         )
 
-        for i in xrange(n_data):
+        for i in range(n_data):
             if gp_results.get(i) is None:
                 logger.info("It wasn't possible to create the GP instance for fold %d" % i)
                 continue
@@ -1819,7 +1819,7 @@ class ValidationGPModel(object):
         std_vec = np.zeros(n_data)
         y_eval = np.zeros(n_data)
 
-        for i in xrange(n_data):
+        for i in range(n_data):
             if new_gp_objects.get(i) is None:
                 logger.info("It wasn't possible to fit the GP for %d" % i)
                 continue

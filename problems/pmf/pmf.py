@@ -125,4 +125,4 @@ if __name__ == '__main__':
     # a=PMF(num_user,num_item,train[3],val[3],epsilon=0.2,lamb=0.291,maxepoch=89,num_feat=9)
     a = cross_validation(num_user, num_item, train, val, epsilon=0.2, lamb=0.29, maxepoch=89,
                          num_Feat=9)
-    print sqrt(a)
+    print(sqrt(a))
