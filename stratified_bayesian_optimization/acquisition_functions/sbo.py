@@ -1736,7 +1736,8 @@ class SBO(object):
                 # start_points = np.concatenate((start_points, task_chosen), axis=1)
             elif n_restarts > 0:
                 new_points = DomainService.get_points_domain(
-                    100, bounds, type_bounds=self.bq.type_bounds)
+                    100, bounds, type_bounds=self.bq.type_bounds,
+                    simplex_domain=self.bq.simplex_domain)
                 current_points = np.array(self.bq.gp.data['points'])
 
                 distances = Distances.dist_square_length_scale(
@@ -1837,7 +1838,7 @@ class SBO(object):
                 wrapper_grad_voi_sgd,
                 minimize=False,
                 full_gradient=wrapper_gradient_voi,
-                args=args_, debug=False,
+                args=args_, debug=False, simplex_domain=self.bq.simplex_domain,
                 **{'maxepoch': maxepoch}
             )
             #TODO: THINK ABOUT N_THREADS. Do we want to run it in parallel?
